@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include <chrono>
 
 void add(int n, float *x, float *y)
 {
@@ -11,7 +12,7 @@ void add(int n, float *x, float *y)
 
 int main(void)
 {
-    int N = 1 << 20; // 1M elements
+    int N = 1 << 28; // 256M elements
 
     float *x = new float[N];
     float *y = new float[N];
@@ -23,14 +24,24 @@ int main(void)
         y[i] = 2.0f;
     }
 
+    // start timer
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();
+
     // Run kernel on 1M elements on the CPU
     add(N, x, y);
+
+    // end timer
+    std::chrono::time_point<std::chrono::high_resolution_clock> end_time = std::chrono::high_resolution_clock::now();
 
     // Check for errors (all values should be 3.0f)
     float maxError = 0.0f;
     for (int i = 0; i < N; i++)
         maxError = fmax(maxError, fabs(y[i] - 3.0f));
     std::cout << "Max error: " << maxError << std::endl;
+
+    // output runtime
+    std::chrono::duration<double> elapsed = end_time - start_time;
+    std::cout << "Elapsed time: " << elapsed.count() << " s\n";
 
     // Free memory
     delete[] x;
